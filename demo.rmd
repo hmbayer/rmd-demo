@@ -1,0 +1,100 @@
+---
+title: "Test Figures for demo"
+author: "abc"
+date: "Feb 15th 2022"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+
+```{r echo = F, warning = F, message = F}
+## Packages
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+library(dplyr)
+```
+
+
+```{r echo = F, warning = F, message = F}
+## Include data
+setwd("C:/Users/GLNML/OneDrive - Bayer/Desktop/markdown")
+ecg.orig <- read.csv("adeg_10.csv", as.is = T)
+ecg.cnt <- read.csv("adeg_10.csv", as.is = F)
+
+ecg.cnt8 <- ecg.cnt[ecg.cnt$TRTPN==8 ,]
+ecg.cnt9 <- ecg.cnt[ecg.cnt$TRTPN==9 ,]
+ecg.cnt10 <- ecg.cnt[ecg.cnt$TRTPN==10 ,]
+
+
+ecg.subset <- ecg.orig  %>%
+        filter(TRTP %in% c("300 mg Drug A", "450 mg Drug A", "500 mg Drug A"))
+
+ecg.subset <- ecg.subset %>% group_by(TRTPN, AVISITN)
+
+
+ecg.subset$SUBJIDN <- as.factor(ecg.subset$SUBJIDN)
+ecg.subset$CHG <- as.numeric(ecg.subset$CHG)
+```
+
+## Bar
+```{r echo=FALSE}
+bar8 <- ggplot(ecg.cnt8, aes(x=AVISIT, y=COUNT, fill=PARAM)) +
+        geom_bar(stat="identity", width=0.5) +
+        scale_x_discrete(name = "Timepoint") +
+        scale_y_continuous(name = "Count") +
+        ggtitle("Cohort A Schedule 1") +
+        theme_minimal() + 
+        theme(legend.title = element_blank()) +
+        theme(axis.text.x = element_text(angle=-30, hjust=1, vjust=1)) +
+        #geom_text(aes(label=COUNT), vjust=10, position=pos, size=3)+
+        scale_fill_brewer(palette="Blues", labels=c("CfB < 10", "CfB >= 10"))
+       
+ggplotly(bar8) 
+```
+
+## Line
+
+```{r echo=FALSE}
+line15mg <- ggplot(subset(ecg.subset, TRTPN==8 & ecg.cnt$PARAMCD == "QRSAG"), 
+                   aes(x=AVISIT, y=AVAL, group=SUBJIDN, color = SUBJIDN)) +
+        geom_point() +
+        geom_line() +
+        geom_text(aes(label=AVAL), hjust=5, vjust=4) +
+        scale_x_discrete(name = "Timepoint") +
+        scale_y_continuous(name = "Absolute Value") +
+        ggtitle("Cohort A Schedule 1") +
+        theme_bw() +
+        theme(axis.text.x = element_text(angle=-30, hjust=1, vjust=1),
+              panel.grid.major = element_blank(),    
+              panel.grid.minor = element_blank()) +
+        scale_colour_brewer(palette="Spectral")
+#line15mg
+ggplotly(line15mg) 
+```
+
+```{r echo=FALSE}
+line25mg <- ggplot(subset(ecg.subset, TRTPN==10 & ecg.cnt$PARAMCD == "QRSAG"), 
+                   aes(x=AVISIT, y=AVAL, group=SUBJIDN, color = SUBJIDN)) +
+        geom_point() +
+        geom_line() +
+        scale_x_discrete(name = "Timepoint") +
+        scale_y_continuous(name = "Absolute Value") +
+        ggtitle("Cohort C Schedule 3") +
+        theme_bw() +
+        theme(axis.text.x = element_text(angle=-30, hjust=1, vjust=1),
+              panel.grid.major = element_blank(),    
+              panel.grid.minor = element_blank()) 
+        
+#line25mg
+ggplotly(line25mg) 
+```
+
+
+
+
+
+
+
